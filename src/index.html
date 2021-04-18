@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Copyright Management</title>
+
+
+    <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/phash-js/dist/phash.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js"></script>
+    <script src="https://wzrd.in/standalone/buffer"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="overlay"></div>
+  
+
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow" style="height: 70px;">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#" target="_blank">
+            
+            Copyright Management System
+        </a>
+        
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                <small><a class="nav-link">Active account - <span id="account"></span></a></small>
+            </li>
+        </ul>
+
+        <div class="form-inline">
+            <button id="ret" onclick="App.toggleDisplay('retrive')" class="btn btn-sm btn-outline-light mr-2 ml-2">Retrieve QR Code</button>
+            <button id="shw" onclick="App.toggleDisplay('blocks')" class="btn btn-sm btn-outline-light mr-2 ml-2">Show All Blocks</button>
+            <button id="new" onclick="App.toggleDisplay('new')" class="btn btn-sm btn-light mr-2 ml-2">Upload a New Image</button>
+        </div>
+    </nav>
+
+
+
+    <div class="container retriveQR" style="display: none;">
+        <div class="col-md-4 col-12 " id="retrive_content1" style="margin-left: auto;margin-right: auto;">
+            <div class="imageDisplay" id="idisplay1">
+                <img id="displayImage1" src="img/icons8-upload-100.png" alt="Image"><br>
+                <span class="mt-2">Select an Watermarked image</span>
+            </div>
+            <input type="file" class="form-control" onchange="changeImage1(this)" hidden name="image" accept="image/*" id="newImage1" required><br>
+            <button type="submit" onclick="App.retriveQRCode();" class="btn btn-dark btn-block">Submit</button>
+        </div>
+
+        <div class="retrive_after col-md-4 col-12 " style="display: none;margin-left: auto;margin-right: auto;">
+            <div class="imageDisplay">
+                <h4>Retrived QR Code</h3><hr>
+                <img src="" id="retrived_qr" alt="retrived-qr"  >
+                <br>
+            </div>
+        </div>
+    </div>
+
+    <div class="container allBlocks" style="display: none;">
+        
+        <div class="row block-detail">
+            
+        </div>
+    </div>
+
+    <div class="container newUpload">
+            <div class="waiting" style="display: block;">
+                <div class="wait">
+                    <img src="./img/blockchain.png" id="wait" alt="Waiting....">
+                    <br>
+                    <br>
+                    <h4>Waiting to connect to blockchain and metamask</h4>
+                </div>
+            </div>
+            <div id="content1" style="display: none;" class="content col-md-4 col-12">
+                <form enctype="multipart/form-data" autocomplete="off" onsubmit="App.addImage(); return false;" method="POST">
+                <!-- <form onsubmit="App.addImage(); return false;" method="POST"> -->
+                    <input type="text" name="owner_name" id="owner_name" class="form-control" placeholder="Owner Name" required><br>
+                    <input type="email" name="owner_email" id="owner_email" class="form-control" placeholder="Owner Email" required><br>
+                    <input type="text" name="image_title" id="image_title" class="form-control" placeholder="Image Title" required><br>
+                    <div class="imageDisplay" id="idisplay">
+                        <img id="displayImage" src="img/icons8-upload-100.png" alt="Image"><br>
+                        <span class="mt-2">Select image</span>
+                    </div>                        
+                    <input type="file" class="form-control" onchange="changeImage(this)" hidden name="image" accept="image/*" id="newImage" required><br>
+                    <button type="submit" class="btn btn-dark btn-block">Submit</button>
+                </form>
+                <span id="isPirated"></span>
+            </div>
+            <div class="after content" style="display: none;">
+                <div class="row imageDisplay">
+                    <div class="col-md-6 mb-3">
+                        <h4>Watermarked Image</h3><hr>
+                        <img src="" id="watermarked-img" alt="watermarked-img"  >
+                        <br>
+                        <p onclick="App.imageDownload(App.watermarkedImage, App.image_title)">Click to download</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h4>Qr Code</h3><hr>
+                        <img src="" id="qrcode" alt="qrcode"  >
+                    </div>
+                    
+                </div>
+                <br>
+                <button class="btn btn-dark btn-block col-md-4 col-12" onclick="App.ipfsUpload()" id="uploadIpfs">Upload to IPFS</button>
+            </div>
+
+
+            <div class="uploading" style="display: none;">
+                <div class="deploy">
+                    <h4>Uploading image to IPFS.</h4><br>
+                    <img src="./img/loading.gif" id="deploy-img" alt="Uploading">
+                </div>
+            </div>
+
+            <div class="ipfs-complete" style="display: none;">
+                <div class="ipfs-img">
+                    <img src="./img/check-circle1.gif" id="ipfs-complete" alt="ipfs complete">
+                    <p>Uploaded to IPFS at <strong><span id="ipfs-address"></span></strong></p>
+                </div>
+                <br>
+                <button class="btn btn-dark btn-block col-md-12 col-12" onclick="App.addBlock()" id="uploadIpfs">Deploy to Blockchain</button>
+            </div>
+
+            <div class="deploying" style="display: none;">
+                <div class="deploy">
+                    <h4>Please wait! <br> Blockchain Deployment in progress :) </h4>
+                    <img src="./img/deployment.gif" id="deploy-img" alt="Deployment">
+                </div>
+            </div>
+
+
+            <div class="deployment-complete" style="display: none;">
+                <div class="ipfs-img">
+                    <img src="./img/check-circle1.gif" id="deploy-complete" alt="deploy complete">
+                    <br>
+                    <br>
+                    <h4><span style="color: green;">Success !</span> <br> Your image is successfully deployed to Blockchain.</h4>
+                </div>
+                <br>
+
+                <button class="btn btn-dark btn-block col-md-12 col-12" onclick="location.reload()">New Image</button>
+
+            </div>
+            <div class="deployment-failed" style="display: none;">
+                <div class="ipfs-img">
+                    <img src="./img/cancel.png" id="deploy-complete" alt="deploy complete">
+                    <br>
+                    <br>
+                    <h4><span style="color: #e24c4b;">Failed !</span> <br> opps, something unexpected occur.</h4>
+                    <p>Probabbly you have rejected the metamask payment.</p>
+                </div>
+                <br>
+            </div>
+    </div>
+
+    
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+
+    <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="vendor/truffle-contract/dist/truffle-contract.js"></script>
+    <script src="app.js"></script>
+    <script>
+        $('#idisplay').click(()=>{
+            $('#newImage').click();
+        })
+
+        function changeImage(input) {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+
+				reader.onload = function (e) {
+                    App.dataUrl = e.target.result
+					$("#displayImage").attr('src', e.target.result)
+				};
+
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+
+        $('#idisplay1').click(()=>{
+            $('#newImage1').click();
+        })
+
+        function changeImage1(input) {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+                
+				reader.onload = function (e) {
+                    App.retriveQR = e.target.result;
+					$("#displayImage1").attr('src', e.target.result)
+				};
+
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+    </script>
+
+</body>
+
+</html>
