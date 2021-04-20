@@ -10,8 +10,13 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 import numpy as np
 import pywt
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
 import os
 from qrcode import make as makeQR
+from skimage.filters import prewitt_h,prewitt_v
+from skimage.io import imread, imshow
 import base64
 import urllib
 from PIL import Image
@@ -30,6 +35,30 @@ def generateQR(data):
     qr.save('qrcode.png')
     global watermarkURL
     watermarkURL = current_path+'/qrcode.png'
+
+def feature_extraction(image_url):
+    image2 = imread(image_url)
+    image2.shape
+    feature_matrix = np.zeros((1984, 2976))
+    feature_matrix.shape
+    for i in range(0,image2.shape[0]):
+        for j in range(0,image2.shape[1]):
+            feature_matrix[i][j] = ((int(image2[i,j,0]) + int(image2[i,j,1]) + int(image2[i,j,2]))/3)
+    features = np.reshape(feature_matrix, (1984*2976))
+    features.shape, features
+    image3 = imread("orignal.jpg")
+    image3.shape
+    feature_matrix2 = np.zeros((1984,2976))
+    feature_matrix2.shape
+    for i in range(0,image3.shape[0]):
+        for j in range(0,image3.shape[1]):
+            feature_matrix2[i][j] = ((int(image3[i,j,0]) + int(image3[i,j,1]) + int(image3[i,j,2]))/3)
+    features2 = np.reshape(feature_matrix2, (1984*2976))
+    features2.shape, features2
+    comparison = features == features2
+    equal_arrays = comparison.all()
+
+    return(equal_arrays)
 
 
 def convert_image(image_url, size):
