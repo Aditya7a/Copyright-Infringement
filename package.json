@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yash2412/copyright-management.git"
+    "url": "git+https://github.com/Aditya7a/Blockchain"
   },
   "keywords": [
     "copyright",
@@ -32,10 +32,8 @@
     "nodemon": "^1.17.3",
     "truffle": "^5.3.0"
   },
-  "bugs": {
-    "url": "https://github.com/Yash2412/copyright-management/issues"
-  },
-  "homepage": "https://github.com/Yash2412/copyright-management#readme",
+ 
+  "homepage": "https://github.com/Aditya7a/Blockchain",
   "dependencies": {
     "truffle-contract": "^4.0.31"
   }
